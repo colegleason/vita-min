@@ -14,6 +14,7 @@
 //= require activestorage
 //= require_tree .
 //= require cfa_styleguide_main
+//= required./document_gallery.js
 
 var immediateUpload = (function() {
   var uploader = function() {

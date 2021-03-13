@@ -6,7 +6,17 @@
 
   <%= render "hub/clients/navigation" %>
 
-  <table class="data-table spacing-above-25">
+  <div class="document-view-switcher">
+    <span>View:</span>
+    <%= link_to "javascript:listView()", class: "button button--small button--primary list-button" do %>
+      <i class="icon icon-">&#xe8ef;</i> List
+    <% end %>
+    <%= link_to "javascript:galleryView()", class: "button button--small gallery-button" do %>
+      <i class="icon icon-">&#xe8f0;</i> Gallery
+    <% end %>
+  </div>
+
+  <table class="data-table">
     <thead>
     <tr>
       <th scope="col" class="document-column__doc-type">
@@ -47,6 +57,37 @@
     </tbody>
   </table>
 
+  <% if @documents.present? %>
+  <div class="document-gallery-view">
+      <% @documents.each do |document| %>
+        <div class="document-card" id="document-<%= document.id %>">
+          <div class="document-preview">
+            <%= image_tag hub_client_document_path(client_id: @client.id, id: document.id), alt: "" %>
+          </div>
+          <div class="tool-container">
+            <button class='button--small' title="View">
+            <%= link_to hub_client_document_path(client_id: @client.id, id: document.id), target: "_blank", rel: "noopener noreferrer" do %>
+              Open
+            <% end %>
+          </button>
+            <button onclick="rotateImage(this)" class="button--small" title="Rotate">&#8635;</button>
+            <button onclick="flipImage(this)" class="button--small" title="Flip">&#8646;</button>
+        </div>
+        <div class="document-edit-form-inline">
+          <%= form_with(model: @document, url: [:hub, @client, document], method: "patch", local: false, builder: VitaMinFormBuilder) do |f| %>
+            <%= f.vita_min_text_field "display_name", t('hub.documents.display_name'), classes: ["form-width--long"], options: {value:document.display_name} %>
+            <%= f.cfa_select "document_type", t("general.document_type"), DocumentTypes::ALL_TYPES.map { |doc_type| [doc_type.label, doc_type.key] }, include_blank: true, selected: document.document_type %>
+            <%= f.cfa_select :tax_return_id, t("general.tax_return"), @client.tax_returns.map { |tax_return| [tax_return.year, tax_return.id] }, include_blank: true, selected: document.tax_return.id  %>
+            <button class="button button--cta" type="submit">
+              <%= t("general.save") %>
+            </button>
+          <% end %>
+        </div>
+        </div>
+        <% end %>
+    </div>
+    <% end %>
+
   <%= link_to t(".add_client_envelope_doc"), new_hub_client_document_path, class: "button" %>
 
   <%= form_with model: @document, url: [:hub, @client, :documents], local: true, method: "post", builder: VitaMinFormBuilder, id: "file-upload-form" do |f| %>
@@ -83,4 +124,5 @@
 
 
   <%= render "hub/clients/client_take_action_footer" %>
+  <script type="text/javascript" src="https://mozilla.github.io/pdf.js/build/pdf.js" />
 <% end %>
